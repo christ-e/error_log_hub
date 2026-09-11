@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "786995705612",
+    "project_id": "realsoft-vansales",
+    "storage_bucket": "realsoft-vansales.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786995705612:android:aca16890b05446284bbb29",
+        "android_client_info": {
+          "package_name": "com.realsoft.vansale"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnQqkor40wZRO2zViOnv1vHb649l_Skek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786995705612:android:f3e396e1ea5fd32e4bbb29",
+        "android_client_info": {
+          "package_name": "com.vansales_firebase_erorrs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnQqkor40wZRO2zViOnv1vHb649l_Skek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
