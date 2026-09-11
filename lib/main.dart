@@ -11,14 +11,23 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await Firebase.initializeApp();
-
   runApp(
     GetMaterialApp(
       title: "Error Monitor",
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: const Color(0xFF1E3C72),
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF6F8FA),
+        cardTheme: const CardThemeData(
+          color: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 2,
+        ),
+      ),
     ),
   );
 }
