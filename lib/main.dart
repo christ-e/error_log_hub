@@ -11,9 +11,18 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  try {
+    await Firebase.initializeApp(
+      name: 'RealsoftHr',
+      options: RealsoftHrFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Error initializing RealsoftHr Firebase: $e');
+  }
+
   runApp(
     GetMaterialApp(
-      title: "Error Monitor",
+      title: "Error Monitoring Hub",
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
       debugShowCheckedModeBanner: false,

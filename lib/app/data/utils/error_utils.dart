@@ -104,6 +104,14 @@ class DateTimeHelper {
     if (doc['timestamp'] is int) {
       return DateTime.fromMillisecondsSinceEpoch(doc['timestamp'] as int);
     }
+    if (doc['timestamp'] is String && (doc['timestamp'] as String).trim().isNotEmpty) {
+      final parsed = DateTime.tryParse((doc['timestamp'] as String).trim());
+      if (parsed != null) return parsed;
+    }
+    if (doc['Punch_Time/Date'] is String && (doc['Punch_Time/Date'] as String).trim().isNotEmpty) {
+      final parsed = DateTime.tryParse((doc['Punch_Time/Date'] as String).trim());
+      if (parsed != null) return parsed;
+    }
 
     // 2. Check date & time string fields (e.g. "March 15, 2024" or "2024-03-15")
     final dateStr = (doc['date'] ?? '').toString().trim();

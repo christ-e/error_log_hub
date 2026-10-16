@@ -36,7 +36,7 @@ class LoginController extends GetxController {
         password: passwordController.text.trim(),
       );
 
-      Get.offAllNamed(Routes.HOME);
+      Get.offAllNamed(Routes.APP_SELECTION);
     } on FirebaseAuthException catch (e) {
       Get.snackbar(
         'Login Failed',

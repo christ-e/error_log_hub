@@ -7,11 +7,13 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:excel/excel.dart';
 import 'package:vansales_firebase_erorrs/app/data/utils/error_utils.dart';
+import 'package:vansales_firebase_erorrs/app/data/utils/firebase_app_manager.dart';
 
 enum TimeFilter { all, today, last24h, last7d }
 
 class ExceptionEroorController extends GetxController {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore get _firestore => FirebaseAppManager.getFirestore();
+  String get _collectionName => FirebaseAppManager.getExceptionCollection();
   StreamSubscription<QuerySnapshot>? _liveSubscription;
 
   RxBool isLoading = false.obs;
@@ -62,7 +64,14 @@ class ExceptionEroorController extends GetxController {
     try {
       isLoading.value = true;
 
-      Query query = _firestore.collection('Exception').orderBy('timestamp', descending: true);
+      Query query = _firestore.collection(_collectionName);
+      try {
+        query = query.orderBy('timestamp', descending: true);
+      } catch (_) {
+        try {
+          query = query.orderBy('Servertimestamp', descending: true);
+        } catch (_) {}
+      }
 
       QuerySnapshot snap;
       if (limit.value == 0) {
@@ -114,7 +123,14 @@ class ExceptionEroorController extends GetxController {
 
   void _startLiveListening() {
     _liveSubscription?.cancel();
-    Query query = _firestore.collection('Exception').orderBy('timestamp', descending: true);
+    Query query = _firestore.collection(_collectionName);
+    try {
+      query = query.orderBy('timestamp', descending: true);
+    } catch (_) {
+      try {
+        query = query.orderBy('Servertimestamp', descending: true);
+      } catch (_) {}
+    }
     if (limit.value > 0) {
       query = query.limit(limit.value);
     }
@@ -292,7 +308,7 @@ class ExceptionEroorController extends GetxController {
   // 🗑️ DELETE ONE
   Future<void> deleteException(String docId) async {
     try {
-      await _firestore.collection('Exception').doc(docId).delete();
+      await _firestore.collection(_collectionName).doc(docId).delete();
 
       exceptions.removeWhere((e) => e['id'] == docId);
       unfilteredExceptions.removeWhere((e) => e['id'] == docId);
@@ -328,7 +344,7 @@ class ExceptionEroorController extends GetxController {
       for (var item in group.instances) {
         final id = item['id'];
         if (id != null && id.toString().isNotEmpty) {
-          final ref = _firestore.collection('Exception').doc(id.toString());
+          final ref = _firestore.collection(_collectionName).doc(id.toString());
           batch.delete(ref);
           idsToRemove.add(id.toString());
         }
@@ -375,7 +391,7 @@ class ExceptionEroorController extends GetxController {
       for (var item in unfilteredExceptions) {
         final id = item['id'];
         if (id != null) {
-          final ref = _firestore.collection('Exception').doc(id.toString());
+          final ref = _firestore.collection(_collectionName).doc(id.toString());
           batch.delete(ref);
         }
       }

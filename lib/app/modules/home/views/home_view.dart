@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:vansales_firebase_erorrs/app/data/utils/error_utils.dart';
 import 'package:vansales_firebase_erorrs/app/modules/exception_eroor/views/exception_eroor_detail.dart';
 import 'package:vansales_firebase_erorrs/app/modules/function_eroor_404/views/function_error_404_detail.dart';
+import 'package:vansales_firebase_erorrs/app/routes/app_pages.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -21,6 +22,17 @@ class HomeView extends GetView<HomeController> {
               expandedHeight: 180,
               pinned: true,
               backgroundColor: const Color(0xFF1E3C72),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                tooltip: 'Back to App Selection',
+                onPressed: () {
+                  if (Navigator.canPop(context)) {
+                    Get.back();
+                  } else {
+                    Get.offAllNamed(Routes.APP_SELECTION);
+                  }
+                },
+              ),
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
                   decoration: const BoxDecoration(
@@ -40,19 +52,55 @@ class HomeView extends GetView<HomeController> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Row(
-                                children: [
-                                  Icon(Icons.shield_outlined, color: Colors.white, size: 28),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Error Monitor',
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
+                              Expanded(
+                                child: Obx(() {
+                                  final app = controller.currentApp.value;
+                                  return Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: Icon(
+                                          app?.icon ?? Icons.shield_outlined,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              app?.name ?? 'Error Monitor',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            if (app != null)
+                                              Text(
+                                                app.tag,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.white70,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }),
                               ),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -91,6 +139,11 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.apps_rounded, color: Colors.white),
+                  tooltip: 'Switch Application',
+                  onPressed: () => Get.offAllNamed(Routes.APP_SELECTION),
+                ),
                 IconButton(
                   icon: const Icon(Icons.refresh, color: Colors.white),
                   tooltip: 'Refresh Dashboard',

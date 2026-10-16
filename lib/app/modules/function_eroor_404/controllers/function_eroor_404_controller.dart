@@ -7,10 +7,12 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:excel/excel.dart';
 import 'package:vansales_firebase_erorrs/app/data/utils/error_utils.dart';
+import 'package:vansales_firebase_erorrs/app/data/utils/firebase_app_manager.dart';
 import 'package:vansales_firebase_erorrs/app/modules/exception_eroor/controllers/exception_eroor_controller.dart';
 
 class FunctionEroor404Controller extends GetxController {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore get _firestore => FirebaseAppManager.getFirestore();
+  String get _collectionName => FirebaseAppManager.get404Collection();
   StreamSubscription<QuerySnapshot>? _liveSubscription;
 
   RxBool isLoading = false.obs;
@@ -61,7 +63,14 @@ class FunctionEroor404Controller extends GetxController {
     try {
       isLoading.value = true;
 
-      Query query = _firestore.collection('FunctionError-404').orderBy('Servertimestamp', descending: true);
+      Query query = _firestore.collection(_collectionName);
+      try {
+        query = query.orderBy('Servertimestamp', descending: true);
+      } catch (_) {
+        try {
+          query = query.orderBy('timestamp', descending: true);
+        } catch (_) {}
+      }
 
       QuerySnapshot snap;
       if (limit.value == 0) {
@@ -113,7 +122,14 @@ class FunctionEroor404Controller extends GetxController {
 
   void _startLiveListening() {
     _liveSubscription?.cancel();
-    Query query = _firestore.collection('FunctionError-404').orderBy('Servertimestamp', descending: true);
+    Query query = _firestore.collection(_collectionName);
+    try {
+      query = query.orderBy('Servertimestamp', descending: true);
+    } catch (_) {
+      try {
+        query = query.orderBy('timestamp', descending: true);
+      } catch (_) {}
+    }
     if (limit.value > 0) {
       query = query.limit(limit.value);
     }
@@ -291,7 +307,7 @@ class FunctionEroor404Controller extends GetxController {
   // 🗑️ DELETE ONE
   Future<void> deleteError(String docId) async {
     try {
-      await _firestore.collection('FunctionError-404').doc(docId).delete();
+      await _firestore.collection(_collectionName).doc(docId).delete();
 
       errors.removeWhere((e) => e['id'] == docId);
       unfilteredErrors.removeWhere((e) => e['id'] == docId);
@@ -335,7 +351,7 @@ class FunctionEroor404Controller extends GetxController {
       for (var item in group.instances) {
         final id = item['id'];
         if (id != null && id.toString().isNotEmpty) {
-          final ref = _firestore.collection('FunctionError-404').doc(id.toString());
+          final ref = _firestore.collection(_collectionName).doc(id.toString());
           batch.delete(ref);
           idsToRemove.add(id.toString());
         }
@@ -383,7 +399,7 @@ class FunctionEroor404Controller extends GetxController {
       for (var item in unfilteredErrors) {
         final docId = item['id'];
         if (docId != null) {
-          final ref = _firestore.collection('FunctionError-404').doc(docId.toString());
+          final ref = _firestore.collection(_collectionName).doc(docId.toString());
           batch.delete(ref);
         }
       }
