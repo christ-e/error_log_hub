@@ -7,6 +7,7 @@ class FirebaseAppManager {
   static const String appIdVanSales = 'vansales';
   static const String appIdEssFace = 'ess_face';
   static const String appIdBsms = 'bsms';
+  static const String appIdEss = 'ess';
 
   /// Get the current active app ID from AppSelectionController or fallback to vansales
   static String getActiveAppId([String? overrideId]) {
@@ -30,6 +31,13 @@ class FirebaseAppManager {
         return FirebaseFirestore.instance;
       }
     }
+    if (id == appIdEss || id == appIdBsms) {
+      try {
+        return FirebaseFirestore.instanceFor(app: Firebase.app('RealsoftErpApps'));
+      } catch (e) {
+        return FirebaseFirestore.instance;
+      }
+    }
     return FirebaseFirestore.instance;
   }
 
@@ -39,8 +47,11 @@ class FirebaseAppManager {
     if (id == appIdEssFace) {
       return 'Function_Exception_Error';
     }
+    if (id == appIdEss) {
+      return 'ESS_exception_logs';
+    }
     if (id == appIdBsms) {
-      return 'BSMS_Exception';
+      return 'BSMS-exception_logs';
     }
     return 'Exception';
   }
@@ -51,8 +62,11 @@ class FirebaseAppManager {
     if (id == appIdEssFace) {
       return 'Function_404_Error';
     }
+    if (id == appIdEss) {
+      return 'ESS_error_logs';
+    }
     if (id == appIdBsms) {
-      return 'BSMS_404_Error';
+      return 'BSMS_error_logs';
     }
     return 'FunctionError-404';
   }
@@ -64,14 +78,20 @@ class FirebaseAppManager {
       return const [
         'Function_Exception_Error',
         'Function_404_Error',
-        'Punch_Error',
+        'Punch_Error_404',
         'Punch_Exception_Error',
       ];
     }
     if (id == appIdBsms) {
       return const [
-        'BSMS_Exception',
-        'BSMS_404_Error',
+        'BSMS-exception_logs',
+        'BSMS_error_logs',
+      ];
+    }
+    if (id == appIdEss) {
+      return const [
+        'ESS_exception_logs',
+        'ESS_error_logs',
       ];
     }
     return const [

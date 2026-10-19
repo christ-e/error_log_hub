@@ -123,6 +123,15 @@ class DateTimeHelper {
         final parsed = DateTime.tryParse(fullString);
         if (parsed != null) return parsed;
 
+        try {
+          if (timeStr.isNotEmpty) {
+            return DateFormat('yyyy-MM-dd hh:mm a').parse(fullString);
+          }
+        } catch (_) {}
+        try {
+          return DateFormat('yyyy-MM-dd').parse(dateStr);
+        } catch (_) {}
+
         return DateFormat('MMMM dd, yyyy').parse(dateStr);
       } catch (_) {}
     }
@@ -191,15 +200,29 @@ class GroupedErrorItem {
 
   Set<String> get affectedRoutes {
     return instances
-        .map((e) => (e['Route'] ?? '').toString())
+        .map((e) => (e['Route'] ?? e['route'] ?? '').toString())
         .where((r) => r.isNotEmpty)
         .toSet();
   }
 
   Set<String> get affectedRsnIds {
     return instances
-        .map((e) => (e['RSNID'] ?? '').toString())
+        .map((e) => (e['RSNID'] ?? e['rsnId'] ?? '').toString())
         .where((r) => r.isNotEmpty)
+        .toSet();
+  }
+
+  Set<String> get affectedEmployees {
+    return instances
+        .map((e) => (e['empName'] ?? '').toString())
+        .where((emp) => emp.isNotEmpty && emp != 'Unknown')
+        .toSet();
+  }
+
+  Set<String> get affectedBranches {
+    return instances
+        .map((e) => (e['branchId'] ?? '').toString())
+        .where((b) => b.isNotEmpty && b != 'Unknown')
         .toSet();
   }
 
@@ -217,10 +240,13 @@ class GroupedErrorItem {
     final Map<String, List<Map<String, dynamic>>> map = {};
 
     for (final doc in list) {
-      final fn = (doc['Function'] ?? 'Unknown').toString().trim();
-      final err = isFunction404
-          ? (doc['message'] ?? doc['error'] ?? 'Unknown Error').toString().trim()
-          : (doc['error'] ?? doc['message'] ?? 'Unknown Exception').toString().trim();
+      final fn = (doc['functionName'] ?? doc['Function'] ?? 'Unknown').toString().trim();
+      final err = (doc['errorDetails'] ??
+              (isFunction404
+                  ? (doc['message'] ?? doc['error'] ?? 'Unknown Error')
+                  : (doc['error'] ?? doc['message'] ?? 'Unknown Exception')))
+          .toString()
+          .trim();
 
       final key = '$fn::$err';
       map.putIfAbsent(key, () => []).add(doc);
@@ -228,10 +254,12 @@ class GroupedErrorItem {
 
     final result = map.entries.map((entry) {
       final first = entry.value.first;
-      final fn = (first['Function'] ?? 'Unknown').toString();
-      final err = isFunction404
-          ? (first['message'] ?? first['error'] ?? '').toString()
-          : (first['error'] ?? first['message'] ?? '').toString();
+      final fn = (first['functionName'] ?? first['Function'] ?? 'Unknown').toString();
+      final err = (first['errorDetails'] ??
+              (isFunction404
+                  ? (first['message'] ?? first['error'] ?? '')
+                  : (first['error'] ?? first['message'] ?? '')))
+          .toString();
 
       return GroupedErrorItem(
         key: entry.key,
@@ -254,16 +282,20 @@ class BugReportBuilder {
     required Map<String, dynamic> data,
     int? occurrenceCount,
   }) {
-    final fn = data['Function'] ?? 'Unknown';
-    final err = data['error'] ?? data['message'] ?? 'N/A';
+    final fn = data['functionName'] ?? data['Function'] ?? 'Unknown';
+    final err = data['errorDetails'] ?? data['error'] ?? data['message'] ?? 'N/A';
     final msg = data['message'] ?? '';
-    final route = data['Route'] ?? 'N/A';
-    final rsn = data['RSNID'] ?? 'N/A';
+    final route = data['Route'] ?? data['route'] ?? '';
+    final rsn = data['rsnId'] ?? data['RSNID'] ?? 'N/A';
+    final empName = data['empName'];
+    final empId = data['empId'];
+    final branchId = data['branchId'];
+    final errorType = data['errorType'];
     final version = data['appVersion'] ?? data['appversion'] ?? 'N/A';
     final date = data['date'] ?? '';
     final time = data['time'] ?? '';
-    final stack = data['Stack'] ?? '';
-    final params = data['Params'] ?? '';
+    final stack = (data['stack'] ?? data['Stack'] ?? '').toString();
+    final params = (data['params'] ?? data['Params'] ?? '').toString();
 
     final culprit = StackTraceHelper.getCulpritFrame(stack);
 
@@ -273,7 +305,18 @@ class BugReportBuilder {
       sb.writeln('🔥 **Occurrences:** $occurrenceCount times');
     }
     sb.writeln('- **Function:** `$fn`');
-    sb.writeln('- **Route:** `$route`');
+    if (errorType != null) {
+      sb.writeln('- **Error Type:** `$errorType`');
+    }
+    if (empName != null && empName.toString() != 'Unknown') {
+      sb.writeln('- **Employee:** $empName (ID: $empId)');
+    }
+    if (branchId != null && branchId.toString() != 'Unknown') {
+      sb.writeln('- **Branch ID:** `$branchId`');
+    }
+    if (route.isNotEmpty && route != 'N/A') {
+      sb.writeln('- **Route:** `$route`');
+    }
     sb.writeln('- **RSN ID:** `$rsn`');
     sb.writeln('- **App Version:** `$version`');
     sb.writeln('- **Recorded At:** $date $time');
@@ -289,14 +332,14 @@ class BugReportBuilder {
     }
     sb.writeln('```');
 
-    if (params.toString().isNotEmpty) {
+    if (params.isNotEmpty) {
       sb.writeln('#### 📦 Parameters:');
       sb.writeln('```json');
       sb.writeln(params);
       sb.writeln('```');
     }
 
-    if (stack.toString().isNotEmpty) {
+    if (stack.isNotEmpty) {
       sb.writeln('#### 📜 Stack Trace:');
       sb.writeln('```');
       sb.writeln(stack);

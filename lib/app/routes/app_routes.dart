@@ -10,6 +10,7 @@ abstract class Routes {
   static const APP_SELECTION = _Paths.APP_SELECTION;
   static const ESS_FACE_ERRORS = _Paths.ESS_FACE_ERRORS;
   static const BSMS_ERRORS = _Paths.BSMS_ERRORS;
+  static const ESS_ERRORS = _Paths.ESS_ERRORS;
 }
 
 abstract class _Paths {
@@ -21,4 +22,5 @@ abstract class _Paths {
   static const APP_SELECTION = '/app-selection';
   static const ESS_FACE_ERRORS = '/ess-face-errors';
   static const BSMS_ERRORS = '/bsms-errors';
+  static const ESS_ERRORS = '/ess-errors';
 }

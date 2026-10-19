@@ -50,6 +50,17 @@ class AppSelectionController extends GetxController {
       accentColor: Color(0xFF2DD4BF),
     ),
     const AppItem(
+      id: 'ess',
+      name: 'ESS System Logs',
+      tag: 'SYSTEM LOGS',
+      description: 'Employee portal diagnostics, API errors, network 404s & fatal exception signatures.',
+      icon: Icons.hub_rounded,
+      primaryColor: Color(0xFF8B5CF6),
+      secondaryColor: Color(0xFF6D28D9),
+      accentColor: Color(0xFFA855F7),
+      status: 'Active',
+    ),
+    const AppItem(
       id: 'bsms',
       name: 'BSMS',
       tag: 'Bed Space Management',
@@ -58,7 +69,7 @@ class AppSelectionController extends GetxController {
       primaryColor: Color(0xFF6D28D9),
       secondaryColor: Color(0xFF7C3AED),
       accentColor: Color(0xFFA78BFA),
-      status:'Not Configured'
+      status: 'Not Configured',
     ),
   ].obs;
 
@@ -94,6 +105,8 @@ class AppSelectionController extends GetxController {
       Get.toNamed(Routes.ESS_FACE_ERRORS, arguments: app);
     } else if (app.id == 'bsms') {
       Get.toNamed(Routes.BSMS_ERRORS, arguments: app);
+    } else if (app.id == 'ess') {
+      Get.toNamed(Routes.ESS_ERRORS, arguments: app);
     } else {
       Get.toNamed(Routes.HOME, arguments: app);
     }

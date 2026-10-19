@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vansales_firebase_erorrs/app/routes/app_pages.dart';
@@ -35,6 +36,17 @@ class LoginController extends GetxController {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
+
+      try {
+        await FirebaseAuth.instanceFor(app: Firebase.app('RealsoftErpApps')).signInWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+      } catch (_) {
+        try {
+          await FirebaseAuth.instanceFor(app: Firebase.app('RealsoftErpApps')).signInAnonymously();
+        } catch (_) {}
+      }
 
       Get.offAllNamed(Routes.APP_SELECTION);
     } on FirebaseAuthException catch (e) {

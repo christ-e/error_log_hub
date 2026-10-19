@@ -73,3 +73,34 @@ class RealsoftHrFirebaseOptions {
     iosBundleId: 'com.kbyai.facerecog',
   );
 }
+
+/// Firebase Options for the RealsoftERP-Apps (ESS & BSMS) project.
+class RealsoftErpFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      default:
+        return android;
+    }
+  }
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyCHyojr-w38Beie_Tk2davlAhJRYtNldZ8',
+    appId: '1:923119056311:android:de21d294096f3405a5a432',
+    messagingSenderId: '923119056311',
+    projectId: 'realsofterp-apps',
+    storageBucket: 'realsofterp-apps.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCo6ZaqJQZJF0sVrjujFqQ2kdYDgw6FKmM',
+    appId: '1:923119056311:ios:a5d79b1931717ac8a5a432',
+    messagingSenderId: '923119056311',
+    projectId: 'realsofterp-apps',
+    storageBucket: 'realsofterp-apps.firebasestorage.app',
+    iosBundleId: 'com.coral.essapp',
+  );
+}

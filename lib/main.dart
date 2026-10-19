@@ -20,6 +20,15 @@ Future<void> main() async {
     debugPrint('Error initializing RealsoftHr Firebase: $e');
   }
 
+  try {
+    await Firebase.initializeApp(
+      name: 'RealsoftErpApps',
+      options: RealsoftErpFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Error initializing RealsoftErpApps Firebase: $e');
+  }
+
   runApp(
     GetMaterialApp(
       title: "Error Monitoring Hub",

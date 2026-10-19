@@ -4,6 +4,8 @@ import '../modules/app_selection/bindings/app_selection_binding.dart';
 import '../modules/app_selection/views/app_selection_view.dart';
 import '../modules/bsms_errors/bindings/bsms_errors_binding.dart';
 import '../modules/bsms_errors/views/bsms_errors_view.dart';
+import '../modules/ess_errors/bindings/ess_errors_binding.dart';
+import '../modules/ess_errors/views/ess_errors_view.dart';
 import '../modules/ess_face_errors/bindings/ess_face_errors_binding.dart';
 import '../modules/ess_face_errors/views/ess_face_errors_view.dart';
 import '../modules/exception_eroor/bindings/exception_eroor_binding.dart';
@@ -57,6 +59,11 @@ class AppPages {
       name: _Paths.BSMS_ERRORS,
       page: () => const BsmsErrorsView(),
       binding: BsmsErrorsBinding(),
+    ),
+    GetPage(
+      name: _Paths.ESS_ERRORS,
+      page: () => const EssErrorsView(),
+      binding: EssErrorsBinding(),
     ),
   ];
 }

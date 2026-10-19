@@ -8,8 +8,12 @@ import 'package:vansales_firebase_erorrs/app/data/utils/error_utils.dart';
 import 'package:vansales_firebase_erorrs/app/data/utils/firebase_app_manager.dart';
 
 enum EssTimeFilter { all, today, last24h, last7d }
+
 enum PunchSubFilter { all, errors, exceptions }
+
 enum UiSubFilter { all, errors404, exceptions }
+
+enum ActivationStatusFilter { all, activeOnly, warningOnly }
 
 class EssFaceErrorsController extends GetxController with GetSingleTickerProviderStateMixin {
   late TabController tabController;
@@ -17,7 +21,7 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
   FirebaseFirestore get _firestore => FirebaseAppManager.getFirestore(FirebaseAppManager.appIdEssFace);
 
   // Exact 5 collections used by ESS Face FirestoreService:
-  static const String colPunchError = 'Punch_Error';
+  static const String colPunchError = 'Punch_Error_404';
   static const String colPunchException = 'Punch_Exception_Error';
   static const String colFunction404 = 'Function_404_Error';
   static const String colFunctionException = 'Function_Exception_Error';
@@ -52,6 +56,7 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
   // Sub-filters
   final Rx<PunchSubFilter> punchSubFilter = PunchSubFilter.all.obs;
   final Rx<UiSubFilter> uiSubFilter = UiSubFilter.all.obs;
+  final Rx<ActivationStatusFilter> activationFilter = ActivationStatusFilter.all.obs;
 
   // Displayed Document Lists (fed to the tab bodies)
   final RxList<Map<String, dynamic>> displayedPunchDocs = <Map<String, dynamic>>[].obs;
@@ -81,10 +86,33 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
   final RxString searchQuery = ''.obs;
   final Rx<EssTimeFilter> selectedTimeFilter = EssTimeFilter.all.obs;
 
+  // Face Package Activation Exact State Logic
+  Map<String, dynamic>? get latestActivationDoc => rawFaceActivationErrors.isNotEmpty ? rawFaceActivationErrors.first : null;
+
+  bool isDocActive(Map<String, dynamic> doc) {
+    final state = doc['facepluginState'];
+    if (state is int) {
+      return state == 0;
+    }
+    final stateStr = state?.toString().trim();
+    if (stateStr == '0') return true;
+    final warn = (doc['warningState'] ?? '').toString().trim().toLowerCase();
+    return warn == 'activated';
+  }
+
+  bool get isLatestLicenseActive {
+    final doc = latestActivationDoc;
+    if (doc == null) return false;
+    return isDocActive(doc);
+  }
+
+  int get activeActivationCount => rawFaceActivationErrors.where(isDocActive).length;
+  int get warningActivationCount => rawFaceActivationErrors.length - activeActivationCount;
+
   @override
   void onInit() {
     super.onInit();
-    // 3 Main Tabs: Punch Errors (0), UI Errors (1), FacePackageActivation Error (2)
+    // 3 Main Tabs: Punch Errors (0), UI Errors (1), Face Activation (2)
     tabController = TabController(length: 3, vsync: this);
     tabController.addListener(() {
       selectedTabIndex.value = tabController.index;
@@ -138,12 +166,8 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
     _cancelSubscriptions();
 
     try {
-      // 1. Punch_Error
-      _punchErrSub = _firestore
-          .collection(colPunchError)
-          .limit(100)
-          .snapshots()
-          .listen((snap) {
+      // 1. Punch_Error_404
+      _punchErrSub = _firestore.collection(colPunchError).limit(100).snapshots().listen((snap) {
         final docs = snap.docs.map((d) => {'id': d.id, '_col': colPunchError, ...d.data()}).toList();
         _sortDocs(docs);
         rawPunchErrors.assignAll(docs);
@@ -151,15 +175,11 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
         applyFilters();
       }, onError: (err) {
         log('Error in $colPunchError: $err');
-        errorMessage.value = 'Punch_Error stream error: $err';
+        errorMessage.value = 'Punch_Error_404 stream error: $err';
       });
 
       // 2. Punch_Exception_Error
-      _punchExcSub = _firestore
-          .collection(colPunchException)
-          .limit(100)
-          .snapshots()
-          .listen((snap) {
+      _punchExcSub = _firestore.collection(colPunchException).limit(100).snapshots().listen((snap) {
         final docs = snap.docs.map((d) => {'id': d.id, '_col': colPunchException, ...d.data()}).toList();
         _sortDocs(docs);
         rawPunchExceptions.assignAll(docs);
@@ -170,11 +190,7 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
       });
 
       // 3. Function_404_Error
-      _fn404Sub = _firestore
-          .collection(colFunction404)
-          .limit(100)
-          .snapshots()
-          .listen((snap) {
+      _fn404Sub = _firestore.collection(colFunction404).limit(100).snapshots().listen((snap) {
         final docs = snap.docs.map((d) => {'id': d.id, '_col': colFunction404, ...d.data()}).toList();
         _sortDocs(docs);
         rawFunctionErrors.assignAll(docs);
@@ -185,11 +201,7 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
       });
 
       // 4. Function_Exception_Error
-      _fnExcSub = _firestore
-          .collection(colFunctionException)
-          .limit(100)
-          .snapshots()
-          .listen((snap) {
+      _fnExcSub = _firestore.collection(colFunctionException).limit(100).snapshots().listen((snap) {
         final docs = snap.docs.map((d) => {'id': d.id, '_col': colFunctionException, ...d.data()}).toList();
         _sortDocs(docs);
         rawFunctionExceptions.assignAll(docs);
@@ -200,11 +212,7 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
       });
 
       // 5. FacePackageActivation_Error
-      _activationSub = _firestore
-          .collection(colFaceActivation)
-          .limit(100)
-          .snapshots()
-          .listen((snap) {
+      _activationSub = _firestore.collection(colFaceActivation).limit(100).snapshots().listen((snap) {
         final docs = snap.docs.map((d) => {'id': d.id, '_col': colFaceActivation, ...d.data()}).toList();
         _sortDocs(docs);
         rawFaceActivationErrors.assignAll(docs);
@@ -291,7 +299,18 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
     final pExceptions = rawPunchExceptions.where((d) => _matchesFilter(d, query, timeFilter)).toList();
     final uErrors = rawFunctionErrors.where((d) => _matchesFilter(d, query, timeFilter)).toList();
     final uExceptions = rawFunctionExceptions.where((d) => _matchesFilter(d, query, timeFilter)).toList();
-    final aErrors = rawFaceActivationErrors.where((d) => _matchesFilter(d, query, timeFilter)).toList();
+
+    // Face Activation filtering
+    final aErrors = rawFaceActivationErrors.where((d) {
+      if (!_matchesFilter(d, query, timeFilter)) return false;
+      if (activationFilter.value == ActivationStatusFilter.activeOnly) {
+        return isDocActive(d);
+      }
+      if (activationFilter.value == ActivationStatusFilter.warningOnly) {
+        return !isDocActive(d);
+      }
+      return true;
+    }).toList();
 
     filteredPunchErrors.assignAll(pErrors);
     filteredPunchExceptions.assignAll(pExceptions);
@@ -339,7 +358,7 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
     }
 
     if (query.isNotEmpty) {
-      final fn = (doc['function'] ?? doc['Function'] ?? doc['package'] ?? '').toString().toLowerCase();
+      final fn = (doc['function'] ?? doc['Function'] ?? '').toString().toLowerCase();
       final err = (doc['error'] ?? doc['message'] ?? '').toString().toLowerCase();
       final emp = (doc['EmpCode'] ?? doc['RSNID'] ?? doc['employeeId'] ?? '').toString().toLowerCase();
       final branch = (doc['Branch'] ?? '').toString().toLowerCase();
@@ -347,7 +366,9 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
       final status = (doc['Punch_Status'] ?? doc['status'] ?? '').toString().toLowerCase();
       final params = (doc['params'] ?? '').toString().toLowerCase();
       final ver = (doc['AppVersion'] ?? doc['appVersion'] ?? '').toString().toLowerCase();
-      final key = (doc['licenseKey'] ?? doc['license'] ?? doc['key'] ?? '').toString().toLowerCase();
+      final key = (doc['activationKey'] ?? doc['activationCode'] ?? doc['licenseKey'] ?? '').toString().toLowerCase();
+      final pluginState = (doc['facepluginState'] ?? '').toString().toLowerCase();
+      final warnState = (doc['warningState'] ?? '').toString().toLowerCase();
 
       final matches = fn.contains(query) ||
           err.contains(query) ||
@@ -357,7 +378,9 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
           status.contains(query) ||
           params.contains(query) ||
           ver.contains(query) ||
-          key.contains(query);
+          key.contains(query) ||
+          pluginState.contains(query) ||
+          warnState.contains(query);
 
       if (!matches) return false;
     }
@@ -377,6 +400,11 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
 
   void setUiSubFilter(UiSubFilter filter) {
     uiSubFilter.value = filter;
+    applyFilters();
+  }
+
+  void setActivationFilter(ActivationStatusFilter filter) {
+    activationFilter.value = filter;
     applyFilters();
   }
 

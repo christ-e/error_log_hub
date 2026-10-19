@@ -114,58 +114,59 @@ class EssFaceErrorsView extends GetView<EssFaceErrorsController> {
                           ),
                           const SizedBox(height: 12),
 
-                          // 📊 4 Interactive Stat Cards: 1-tap shortcuts
+                          // 📊 5 Quick Stat Cards (horizontal scrollable)
                           Obx(
-                            () => Row(
-                              children: [
-                                Expanded(
-                                  child: _buildMetricTile(
+                            () => SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  _buildMetricTile(
                                     title: 'Punch Err',
                                     today: controller.todayPunchErrors.value,
                                     total: controller.punchErrorsCount.value,
                                     color: Colors.orange.shade300,
-                                    isSelected: controller.selectedTabIndex.value == 0 &&
-                                        controller.punchSubFilter.value == PunchSubFilter.errors,
+                                    isSelected: controller.selectedTabIndex.value == 0 && controller.punchSubFilter.value == PunchSubFilter.errors,
                                     onTap: () => controller.switchToPunchTab(subFilter: PunchSubFilter.errors),
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: _buildMetricTile(
+                                  const SizedBox(width: 6),
+                                  _buildMetricTile(
                                     title: 'Punch Excep',
                                     today: controller.todayPunchExceptions.value,
                                     total: controller.punchExceptionsCount.value,
                                     color: Colors.amber.shade300,
-                                    isSelected: controller.selectedTabIndex.value == 0 &&
-                                        controller.punchSubFilter.value == PunchSubFilter.exceptions,
+                                    isSelected:
+                                        controller.selectedTabIndex.value == 0 && controller.punchSubFilter.value == PunchSubFilter.exceptions,
                                     onTap: () => controller.switchToPunchTab(subFilter: PunchSubFilter.exceptions),
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: _buildMetricTile(
+                                  const SizedBox(width: 6),
+                                  _buildMetricTile(
                                     title: 'UI 404',
                                     today: controller.todayFunctionErrors.value,
                                     total: controller.functionErrorsCount.value,
                                     color: Colors.redAccent.shade100,
-                                    isSelected: controller.selectedTabIndex.value == 1 &&
-                                        controller.uiSubFilter.value == UiSubFilter.errors404,
+                                    isSelected: controller.selectedTabIndex.value == 1 && controller.uiSubFilter.value == UiSubFilter.errors404,
                                     onTap: () => controller.switchToUiTab(subFilter: UiSubFilter.errors404),
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: _buildMetricTile(
+                                  const SizedBox(width: 6),
+                                  _buildMetricTile(
                                     title: 'UI Excep',
                                     today: controller.todayFunctionExceptions.value,
                                     total: controller.functionExceptionsCount.value,
                                     color: Colors.purple.shade200,
-                                    isSelected: controller.selectedTabIndex.value == 1 &&
-                                        controller.uiSubFilter.value == UiSubFilter.exceptions,
+                                    isSelected: controller.selectedTabIndex.value == 1 && controller.uiSubFilter.value == UiSubFilter.exceptions,
                                     onTap: () => controller.switchToUiTab(subFilter: UiSubFilter.exceptions),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 6),
+                                  _buildMetricTile(
+                                    title: 'Activation',
+                                    today: controller.todayFaceActivationErrors.value,
+                                    total: controller.faceActivationErrorsCount.value,
+                                    color: Colors.cyanAccent.shade100,
+                                    isSelected: controller.selectedTabIndex.value == 2,
+                                    onTap: controller.switchToActivationTab,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -187,34 +188,49 @@ class EssFaceErrorsView extends GetView<EssFaceErrorsController> {
                     indicatorWeight: 3,
                     labelColor: tealPrimary,
                     unselectedLabelColor: Colors.grey.shade600,
-                    labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     tabs: [
-                      // TAB 1: PUNCH ERROR TAB
+                      // TAB 1: PUNCH ERROR
                       Obx(
                         () => Tab(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.fingerprint_rounded, size: 18),
-                              const SizedBox(width: 6),
+                              const Icon(Icons.fingerprint_rounded, size: 16),
+                              const SizedBox(width: 4),
                               const Text('Punch Error'),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 4),
                               _badge('${controller.totalPunchCount}', Colors.orange),
                             ],
                           ),
                         ),
                       ),
-                      // TAB 2: UI ERROR TAB
+                      // TAB 2: UI ERROR
                       Obx(
                         () => Tab(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.desktop_windows_rounded, size: 18),
-                              const SizedBox(width: 6),
+                              const Icon(Icons.desktop_windows_rounded, size: 16),
+                              const SizedBox(width: 4),
                               const Text('UI Error'),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 4),
                               _badge('${controller.totalUiCount}', Colors.teal),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // TAB 3: FACE PACKAGE ACTIVATION (Dedicated License View)
+                      Obx(
+                        () => Tab(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.vpn_key_rounded, size: 16),
+                              const SizedBox(width: 4),
+                              const Text('Activation'),
+                              const SizedBox(width: 4),
+                              _badge('${controller.faceActivationErrorsCount.value}', Colors.cyan.shade800),
                             ],
                           ),
                         ),
@@ -265,7 +281,7 @@ class EssFaceErrorsView extends GetView<EssFaceErrorsController> {
                   TextField(
                     controller: controller.searchController,
                     decoration: InputDecoration(
-                      hintText: 'Search employee, function, error, branch, company...',
+                      hintText: 'Search employee, function, error, branch, license...',
                       prefixIcon: const Icon(Icons.search_rounded, size: 18, color: tealPrimary),
                       suffixIcon: Obx(
                         () => controller.searchQuery.value.isNotEmpty
@@ -314,13 +330,14 @@ class EssFaceErrorsView extends GetView<EssFaceErrorsController> {
             ),
             const Divider(height: 1, color: Color(0xFFE2E8F0)),
 
-            // 📱 Tab Views (Punch Errors & UI Errors)
+            // 📱 3 Tab Views (Punch Errors, UI Errors, Dedicated Activation Console)
             Expanded(
               child: TabBarView(
                 controller: controller.tabController,
                 children: const [
                   PunchErrorsTabView(),
                   UiErrorsTabView(),
+                  ActivationErrorsTabView(),
                 ],
               ),
             ),
@@ -332,14 +349,14 @@ class EssFaceErrorsView extends GetView<EssFaceErrorsController> {
 
   static Widget _badge(String count, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         count,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color),
+        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color),
       ),
     );
   }
@@ -358,7 +375,7 @@ class EssFaceErrorsView extends GetView<EssFaceErrorsController> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: isSelected ? Colors.white.withValues(alpha: 0.28) : Colors.white.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
@@ -470,7 +487,7 @@ class PunchErrorsTabView extends GetView<EssFaceErrorsController> {
               return _buildEmptyState(
                 icon: Icons.fingerprint_rounded,
                 title: 'No Punch Errors Found',
-                subtitle: 'No punch logs matching your current filters in Punch_Error or Punch_Exception_Error.',
+                subtitle: 'No punch logs matching your current filters in Punch_Error_404 or Punch_Exception_Error.',
               );
             }
 
@@ -1100,6 +1117,568 @@ class UiErrorsTabView extends GetView<EssFaceErrorsController> {
         ),
       ),
     );
+  }
+}
+
+// ============================================================================
+// 🔑 TAB 3: DEDICATED FACE PACKAGE LICENSE & ACTIVATION CONSOLE
+// ============================================================================
+class ActivationErrorsTabView extends GetView<EssFaceErrorsController> {
+  const ActivationErrorsTabView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading.value && controller.rawFaceActivationErrors.isEmpty) {
+        return const Center(child: CircularProgressIndicator(color: EssFaceErrorsView.tealPrimary));
+      }
+
+      if (controller.rawFaceActivationErrors.isEmpty) {
+        return _buildEmptyState(
+          icon: Icons.vpn_key_rounded,
+          title: 'No Activation Checks Logged',
+          subtitle: 'The FacePackageActivation_Error collection has no activation records yet.',
+        );
+      }
+
+      final latestDoc = controller.latestActivationDoc;
+      final isLatestActive = controller.isLatestLicenseActive;
+
+      return RefreshIndicator(
+        onRefresh: controller.fetchAllData,
+        color: EssFaceErrorsView.tealPrimary,
+        child: ListView(
+          padding: const EdgeInsets.all(14),
+          children: [
+            // 🛡️ 1. HERO LICENSE STATUS CARD (Live Telemetry)
+            if (latestDoc != null) _buildLicenseHeroCard(context, latestDoc, isLatestActive),
+
+            const SizedBox(height: 14),
+
+            // 📊 2. KPI TELEMETRY STATS
+            _buildActivationKpiRow(),
+
+            const SizedBox(height: 14),
+
+            // 🎛️ 3. ACTIVATION STATUS FILTER PILLS
+            _buildActivationFilterBar(),
+
+            const SizedBox(height: 12),
+
+            // 📜 4. ACTIVATION EVENT FEED
+            if (controller.filteredFaceActivationErrors.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Center(
+                  child: Text(
+                    'No activation checks match current filter',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  ),
+                ),
+              )
+            else
+              ...controller.filteredFaceActivationErrors.map((doc) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _buildActivationEventCard(context, doc),
+                  )),
+          ],
+        ),
+      );
+    });
+  }
+
+  // 🛡️ Hero License Card
+  Widget _buildLicenseHeroCard(BuildContext context, Map<String, dynamic> doc, bool isActive) {
+    final key = (doc['activationKey'] ?? '').toString().trim();
+    final company = (doc['comapany'] ?? '').toString().trim();
+    final version = (doc['appVersion'] ?? '').toString().trim();
+    final dt = DateTimeHelper.extractDateTime(doc);
+    final relativeTime = DateTimeHelper.formatRelative(dt);
+
+    final warningState = _resolveWarningState(doc);
+    final stateCode = doc['facepluginState']?.toString() ?? '0';
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isActive ? [const Color(0xFF047857), const Color(0xFF10B981)] : [const Color(0xFF991B1B), const Color(0xFFEF4444)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: (isActive ? Colors.green : Colors.red).withValues(alpha: 0.25),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  isActive ? Icons.verified_user_rounded : Icons.gpp_bad_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          isActive ? 'Face SDK License Active' : 'License Warning: $warningState',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isActive ? 'Valid license key • 1 check per app launch' : 'Code $stateCode • Calling repeatedly until activated',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  relativeTime,
+                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Activation Key Container
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.key_rounded, color: Colors.white70, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    key.isNotEmpty ? key : 'No activation key configured',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if (key.isNotEmpty)
+                  InkWell(
+                    onTap: () => controller.copyToClipboard(key, 'Activation Key copied'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(Icons.copy_rounded, color: Colors.white.withValues(alpha: 0.9), size: 16),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // Metadata Chips
+          Row(
+            children: [
+              if (company.isNotEmpty) _heroChip(icon: Icons.apartment_rounded, text: 'RSN: $company'),
+              const SizedBox(width: 6),
+              if (version.isNotEmpty) _heroChip(icon: Icons.code_rounded, text: version),
+              const Spacer(),
+              _heroChip(
+                icon: isActive ? Icons.check_circle_outline_rounded : Icons.sync_problem_rounded,
+                text: isActive ? 'Single Ping' : 'Continuous',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _heroChip({required IconData icon, required String text}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 12),
+          const SizedBox(width: 4),
+          Text(text, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  // 📊 2. KPI Stats Row
+  Widget _buildActivationKpiRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: _kpiTile(
+            title: 'Activated (0)',
+            count: controller.activeActivationCount,
+            subtitle: '1-time launch checks',
+            color: const Color(0xFF059669),
+            icon: Icons.check_circle_rounded,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _kpiTile(
+            title: 'Warnings (<0)',
+            count: controller.warningActivationCount,
+            subtitle: 'Continuous calls',
+            color: const Color(0xFFDC2626),
+            icon: Icons.warning_rounded,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _kpiTile(
+            title: 'Total Checks',
+            count: controller.faceActivationErrorsCount.value,
+            subtitle: 'SDK calls recorded',
+            color: const Color(0xFF0F766E),
+            icon: Icons.history_rounded,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _kpiTile({
+    required String title,
+    required int count,
+    required String subtitle,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+              Icon(icon, size: 14, color: color),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$count',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 9, color: Colors.grey.shade500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🎛️ 3. Activation Filter Bar
+  Widget _buildActivationFilterBar() {
+    return Obx(() {
+      final current = controller.activationFilter.value;
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _filterChip(
+              label: 'All Checks (${controller.rawFaceActivationErrors.length})',
+              isSelected: current == ActivationStatusFilter.all,
+              color: Colors.teal,
+              onTap: () => controller.setActivationFilter(ActivationStatusFilter.all),
+            ),
+            const SizedBox(width: 8),
+            _filterChip(
+              label: '🟢 Activated Only (${controller.activeActivationCount})',
+              isSelected: current == ActivationStatusFilter.activeOnly,
+              color: const Color(0xFF059669),
+              onTap: () => controller.setActivationFilter(ActivationStatusFilter.activeOnly),
+            ),
+            const SizedBox(width: 8),
+            _filterChip(
+              label: '🔴 Warnings Only (${controller.warningActivationCount})',
+              isSelected: current == ActivationStatusFilter.warningOnly,
+              color: const Color(0xFFDC2626),
+              onTap: () => controller.setActivationFilter(ActivationStatusFilter.warningOnly),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _filterChip({
+    required String label,
+    required bool isSelected,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withValues(alpha: 0.15) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? color : Colors.grey.shade300,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected ? color : Colors.grey.shade700,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 📜 4. Event Feed Card (Individual Check Record)
+  Widget _buildActivationEventCard(BuildContext context, Map<String, dynamic> doc) {
+    final isActive = controller.isDocActive(doc);
+    final key = (doc['activationKey'] ?? '').toString().trim();
+    final company = (doc['comapany'] ?? '').toString().trim();
+    final version = (doc['appVersion'] ?? '').toString().trim();
+    final dt = DateTimeHelper.extractDateTime(doc);
+    final relativeTime = DateTimeHelper.formatRelative(dt);
+
+    final warningState = _resolveWarningState(doc);
+    final stateCode = doc['facepluginState']?.toString() ?? '0';
+
+    final Color badgeColor;
+    final String statusLabel;
+    final IconData statusIcon;
+
+    if (isActive) {
+      badgeColor = const Color(0xFF059669);
+      statusLabel = 'ACTIVATED (Code 0)';
+      statusIcon = Icons.check_circle_outline_rounded;
+    } else {
+      switch (stateCode) {
+        case '-1':
+        case '-3':
+          badgeColor = const Color(0xFFDC2626);
+          statusLabel = 'INVALID LICENSE (Code $stateCode)';
+          statusIcon = Icons.cancel_outlined;
+          break;
+        case '-2':
+          badgeColor = const Color(0xFFD97706);
+          statusLabel = 'LICENSE EXPIRED (Code -2)';
+          statusIcon = Icons.hourglass_bottom_rounded;
+          break;
+        case '-4':
+          badgeColor = const Color(0xFFCA8A04);
+          statusLabel = 'NOT ACTIVATED (Code -4)';
+          statusIcon = Icons.warning_amber_rounded;
+          break;
+        case '-5':
+          badgeColor = const Color(0xFF9333EA);
+          statusLabel = 'INIT ERROR (Code -5)';
+          statusIcon = Icons.error_outline_rounded;
+          break;
+        default:
+          badgeColor = const Color(0xFFEF4444);
+          statusLabel = 'WARNING (Code $stateCode)';
+          statusIcon = Icons.error_outline_rounded;
+      }
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: badgeColor.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: badgeColor.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => _showGenericDetailSheet(
+            context: context,
+            title: 'Activation Check Details',
+            doc: doc,
+            collection: EssFaceErrorsController.colFaceActivation,
+            accentColor: badgeColor,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: badgeColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: badgeColor.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(statusIcon, size: 12, color: badgeColor),
+                          const SizedBox(width: 4),
+                          Text(
+                            statusLabel,
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: badgeColor),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        warningState,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isActive ? Colors.grey.shade900 : badgeColor,
+                        ),
+                      ),
+                    ),
+                    Text(relativeTime, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Key pill
+                if (key.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.key_rounded, size: 12, color: Colors.grey),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            key,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: Color(0xFF334155)),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => controller.copyToClipboard(key, 'Activation Key copied'),
+                          child: const Icon(Icons.copy_rounded, size: 14, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    if (company.isNotEmpty) _tag('RSN: $company', Colors.indigo),
+                    if (version.isNotEmpty) _tag(version, Colors.grey),
+                    _tag(isActive ? '1 Ping / Launch' : 'Continuous Retry', isActive ? Colors.green : Colors.red),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static String _resolveWarningState(Map<String, dynamic> doc) {
+    final warn = (doc['warningState'] ?? '').toString().trim();
+    if (warn.isNotEmpty) return warn;
+
+    final state = doc['facepluginState'];
+    if (state == 0 || state == '0') return 'Activated';
+    if (state == -1 || state == -3 || state == '-1' || state == '-3') return 'Invalid license!';
+    if (state == -2 || state == '-2') return 'License expired!';
+    if (state == -4 || state == '-4') return 'Not activated!';
+    if (state == -5 || state == '-5') return 'Init error!';
+    return 'Unknown error!';
   }
 }
 
