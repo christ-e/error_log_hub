@@ -362,7 +362,8 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
       final err = (doc['error'] ?? doc['message'] ?? '').toString().toLowerCase();
       final emp = (doc['EmpCode'] ?? doc['RSNID'] ?? doc['employeeId'] ?? '').toString().toLowerCase();
       final branch = (doc['Branch'] ?? '').toString().toLowerCase();
-      final comp = (doc['Comapany'] ?? doc['comapany'] ?? '').toString().toLowerCase();
+      final compRsn = (doc['CompanyRSN'] ?? doc['companyRSN'] ?? doc['Comapany'] ?? doc['comapany'] ?? doc['company'] ?? '').toString().toLowerCase();
+      final compName = (doc['CompanyName'] ?? doc['companyName'] ?? '').toString().toLowerCase();
       final status = (doc['Punch_Status'] ?? doc['status'] ?? '').toString().toLowerCase();
       final params = (doc['params'] ?? '').toString().toLowerCase();
       final ver = (doc['AppVersion'] ?? doc['appVersion'] ?? '').toString().toLowerCase();
@@ -374,7 +375,8 @@ class EssFaceErrorsController extends GetxController with GetSingleTickerProvide
           err.contains(query) ||
           emp.contains(query) ||
           branch.contains(query) ||
-          comp.contains(query) ||
+          compRsn.contains(query) ||
+          compName.contains(query) ||
           status.contains(query) ||
           params.contains(query) ||
           ver.contains(query) ||

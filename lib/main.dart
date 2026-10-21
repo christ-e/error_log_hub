@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:vansales_firebase_erorrs/app/data/services/notification_service.dart';
 import 'package:vansales_firebase_erorrs/firebase_options.dart';
 
 import 'app/routes/app_pages.dart';
@@ -28,6 +29,9 @@ Future<void> main() async {
   } catch (e) {
     debugPrint('Error initializing RealsoftErpApps Firebase: $e');
   }
+
+  // Initialize Local Notifications and In-App Alert Service
+  await Get.putAsync(() => NotificationService().init());
 
   runApp(
     GetMaterialApp(

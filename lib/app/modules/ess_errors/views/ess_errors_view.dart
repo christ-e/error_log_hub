@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vansales_firebase_erorrs/app/data/services/notification_service.dart';
 import 'package:vansales_firebase_erorrs/app/data/utils/error_utils.dart';
 import '../controllers/ess_errors_controller.dart';
 
@@ -28,6 +29,15 @@ class EssErrorsView extends GetView<EssErrorsController> {
 
   @override
   Widget build(BuildContext context) {
+    // Wire up inspect callback for in-app alert banner tap
+    controller.inspectDocCallback = (doc, isException) {
+      if (isException) {
+        _showExceptionSignatureBottomSheet(doc);
+      } else {
+        _showApiErrorInfoBottomSheet(doc);
+      }
+    };
+
     return Scaffold(
       backgroundColor: bgDark,
       body: SafeArea(
@@ -147,6 +157,24 @@ class EssErrorsView extends GetView<EssErrorsController> {
               ),
             ),
           ),
+
+          // Notification Bell Alert Toggle
+          if (Get.isRegistered<NotificationService>())
+            Obx(
+              () => IconButton(
+                tooltip: NotificationService.to.notificationsEnabled.value
+                    ? 'Error Alerts Active (Tap to mute)'
+                    : 'Error Alerts Muted (Tap to enable)',
+                icon: Icon(
+                  NotificationService.to.notificationsEnabled.value
+                      ? Icons.notifications_active_rounded
+                      : Icons.notifications_off_rounded,
+                  color: NotificationService.to.notificationsEnabled.value ? purpleLight : textDim,
+                  size: 22,
+                ),
+                onPressed: NotificationService.to.toggleNotifications,
+              ),
+            ),
 
           // Live Stream Toggle Icon
           Obx(

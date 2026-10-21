@@ -549,7 +549,8 @@ class PunchErrorsTabView extends GetView<EssFaceErrorsController> {
   Widget _buildPunchErrorCard(BuildContext context, Map<String, dynamic> doc) {
     final empCode = (doc['EmpCode'] ?? doc['empCode'] ?? doc['employeeId'] ?? 'No EmpCode').toString();
     final branch = (doc['Branch'] ?? doc['branch'] ?? '').toString();
-    final company = (doc['Comapany'] ?? doc['comapany'] ?? doc['company'] ?? '').toString();
+    final companyRSN = (doc['CompanyRSN'] ?? doc['companyRSN'] ?? doc['Comapany'] ?? doc['comapany'] ?? doc['company'] ?? '').toString().trim();
+    final companyName = (doc['CompanyName'] ?? doc['companyName'] ?? '').toString().trim();
     final punchStatus = (doc['Punch_Status'] ?? doc['punchStatus'] ?? '').toString();
     final punchTime = (doc['Punch_Time/Date'] ?? doc['timestamp'] ?? '').toString();
     final message = (doc['message'] ?? doc['error'] ?? 'Punch failed').toString();
@@ -642,9 +643,10 @@ class PunchErrorsTabView extends GetView<EssFaceErrorsController> {
                   spacing: 6,
                   runSpacing: 4,
                   children: [
+                    if (companyName.isNotEmpty) _tag('🏢 $companyName', Colors.indigo),
+                    if (companyRSN.isNotEmpty) _tag('RSN: $companyRSN', Colors.deepPurple),
                     if (punchStatus.isNotEmpty) _tag('Status: $punchStatus', Colors.teal),
                     if (branch.isNotEmpty) _tag('Branch: $branch', Colors.blue),
-                    if (company.isNotEmpty) _tag('RSN: $company', Colors.indigo),
                     if (appVersion.isNotEmpty) _tag(appVersion, Colors.grey),
                   ],
                 ),
@@ -659,7 +661,8 @@ class PunchErrorsTabView extends GetView<EssFaceErrorsController> {
   Widget _buildPunchExceptionCard(BuildContext context, Map<String, dynamic> doc) {
     final empCode = (doc['EmpCode'] ?? doc['empCode'] ?? doc['employeeId'] ?? '').toString();
     final branch = (doc['Branch'] ?? doc['branch'] ?? '').toString();
-    final company = (doc['Comapany'] ?? doc['comapany'] ?? doc['company'] ?? '').toString();
+    final companyRSN = (doc['CompanyRSN'] ?? doc['companyRSN'] ?? doc['Comapany'] ?? doc['comapany'] ?? doc['company'] ?? '').toString().trim();
+    final companyName = (doc['CompanyName'] ?? doc['companyName'] ?? '').toString().trim();
     final message = (doc['message'] ?? doc['error'] ?? 'Punch crash / exception').toString();
     final error = (doc['error'] ?? '').toString();
     final stack = (doc['stack'] ?? doc['stack_trace'] ?? '').toString();
@@ -759,8 +762,9 @@ class PunchErrorsTabView extends GetView<EssFaceErrorsController> {
                   spacing: 6,
                   runSpacing: 4,
                   children: [
+                    if (companyName.isNotEmpty) _tag('🏢 $companyName', Colors.indigo),
+                    if (companyRSN.isNotEmpty) _tag('RSN: $companyRSN', Colors.deepPurple),
                     if (branch.isNotEmpty) _tag('Branch: $branch', Colors.blue),
-                    if (company.isNotEmpty) _tag('RSN: $company', Colors.indigo),
                     if (appVersion.isNotEmpty) _tag(appVersion, Colors.grey),
                   ],
                 ),
@@ -898,7 +902,8 @@ class UiErrorsTabView extends GetView<EssFaceErrorsController> {
   Widget _buildFunction404Card(BuildContext context, Map<String, dynamic> doc) {
     final fn = (doc['function'] ?? doc['Function'] ?? doc['name'] ?? 'Unknown Function').toString();
     final error = (doc['error'] ?? doc['message'] ?? '404 API Error').toString();
-    final company = (doc['comapany'] ?? doc['Comapany'] ?? doc['company'] ?? '').toString();
+    final companyRSN = (doc['companyRSN'] ?? doc['CompanyRSN'] ?? doc['comapany'] ?? doc['Comapany'] ?? doc['company'] ?? '').toString().trim();
+    final companyName = (doc['companyName'] ?? doc['CompanyName'] ?? '').toString().trim();
     final appVersion = (doc['AppVersion'] ?? doc['appVersion'] ?? '').toString();
     final params = (doc['params'] ?? '').toString();
     final timestamp = (doc['timestamp'] ?? '').toString();
@@ -991,7 +996,8 @@ class UiErrorsTabView extends GetView<EssFaceErrorsController> {
                   spacing: 6,
                   runSpacing: 4,
                   children: [
-                    if (company.isNotEmpty) _tag('RSN: $company', Colors.indigo),
+                    if (companyName.isNotEmpty) _tag('🏢 $companyName', Colors.indigo),
+                    if (companyRSN.isNotEmpty) _tag('RSN: $companyRSN', Colors.deepPurple),
                     if (appVersion.isNotEmpty) _tag(appVersion, Colors.grey),
                   ],
                 ),
@@ -1007,7 +1013,8 @@ class UiErrorsTabView extends GetView<EssFaceErrorsController> {
     final fn = (doc['function'] ?? doc['Function'] ?? doc['name'] ?? 'Unknown Function').toString();
     final error = (doc['error'] ?? doc['message'] ?? 'UI Exception occurred').toString();
     final stack = (doc['stack'] ?? doc['stack_trace'] ?? '').toString();
-    final company = (doc['comapany'] ?? doc['Comapany'] ?? doc['company'] ?? '').toString();
+    final companyRSN = (doc['companyRSN'] ?? doc['CompanyRSN'] ?? doc['comapany'] ?? doc['Comapany'] ?? doc['company'] ?? '').toString().trim();
+    final companyName = (doc['companyName'] ?? doc['CompanyName'] ?? '').toString().trim();
     final appVersion = (doc['AppVersion'] ?? doc['appVersion'] ?? '').toString();
     final params = (doc['params'] ?? '').toString();
     final timestamp = (doc['timestamp'] ?? '').toString();
@@ -1107,7 +1114,8 @@ class UiErrorsTabView extends GetView<EssFaceErrorsController> {
                   spacing: 6,
                   runSpacing: 4,
                   children: [
-                    if (company.isNotEmpty) _tag('RSN: $company', Colors.indigo),
+                    if (companyName.isNotEmpty) _tag('🏢 $companyName', Colors.indigo),
+                    if (companyRSN.isNotEmpty) _tag('RSN: $companyRSN', Colors.deepPurple),
                     if (appVersion.isNotEmpty) _tag(appVersion, Colors.grey),
                   ],
                 ),
@@ -1190,7 +1198,8 @@ class ActivationErrorsTabView extends GetView<EssFaceErrorsController> {
   // 🛡️ Hero License Card
   Widget _buildLicenseHeroCard(BuildContext context, Map<String, dynamic> doc, bool isActive) {
     final key = (doc['activationKey'] ?? '').toString().trim();
-    final company = (doc['comapany'] ?? '').toString().trim();
+    final companyRSN = (doc['companyRSN'] ?? doc['CompanyRSN'] ?? doc['comapany'] ?? doc['Comapany'] ?? doc['company'] ?? '').toString().trim();
+    final companyName = (doc['companyName'] ?? doc['CompanyName'] ?? '').toString().trim();
     final version = (doc['appVersion'] ?? '').toString().trim();
     final dt = DateTimeHelper.extractDateTime(doc);
     final relativeTime = DateTimeHelper.formatRelative(dt);
@@ -1318,7 +1327,9 @@ class ActivationErrorsTabView extends GetView<EssFaceErrorsController> {
           // Metadata Chips
           Row(
             children: [
-              if (company.isNotEmpty) _heroChip(icon: Icons.apartment_rounded, text: 'RSN: $company'),
+              if (companyName.isNotEmpty) _heroChip(icon: Icons.business_rounded, text: companyName),
+              if (companyName.isNotEmpty && companyRSN.isNotEmpty) const SizedBox(width: 6),
+              if (companyRSN.isNotEmpty) _heroChip(icon: Icons.apartment_rounded, text: 'RSN: $companyRSN'),
               const SizedBox(width: 6),
               if (version.isNotEmpty) _heroChip(icon: Icons.code_rounded, text: version),
               const Spacer(),
@@ -1506,7 +1517,8 @@ class ActivationErrorsTabView extends GetView<EssFaceErrorsController> {
   Widget _buildActivationEventCard(BuildContext context, Map<String, dynamic> doc) {
     final isActive = controller.isDocActive(doc);
     final key = (doc['activationKey'] ?? '').toString().trim();
-    final company = (doc['comapany'] ?? '').toString().trim();
+    final companyRSN = (doc['companyRSN'] ?? doc['CompanyRSN'] ?? doc['comapany'] ?? doc['Comapany'] ?? doc['company'] ?? '').toString().trim();
+    final companyName = (doc['companyName'] ?? doc['CompanyName'] ?? '').toString().trim();
     final version = (doc['appVersion'] ?? '').toString().trim();
     final dt = DateTimeHelper.extractDateTime(doc);
     final relativeTime = DateTimeHelper.formatRelative(dt);
@@ -1655,7 +1667,8 @@ class ActivationErrorsTabView extends GetView<EssFaceErrorsController> {
                   spacing: 6,
                   runSpacing: 4,
                   children: [
-                    if (company.isNotEmpty) _tag('RSN: $company', Colors.indigo),
+                    if (companyName.isNotEmpty) _tag('🏢 $companyName', Colors.indigo),
+                    if (companyRSN.isNotEmpty) _tag('RSN: $companyRSN', Colors.deepPurple),
                     if (version.isNotEmpty) _tag(version, Colors.grey),
                     _tag(isActive ? '1 Ping / Launch' : 'Continuous Retry', isActive ? Colors.green : Colors.red),
                   ],
@@ -1786,6 +1799,59 @@ void _showGenericDetailSheet({
             ],
           ),
           const Divider(height: 20),
+          Builder(builder: (context) {
+            final compName = (doc['CompanyName'] ?? doc['companyName'] ?? '').toString().trim();
+            final compRsn = (doc['CompanyRSN'] ?? doc['companyRSN'] ?? doc['Comapany'] ?? doc['comapany'] ?? doc['company'] ?? '').toString().trim();
+            if (compName.isEmpty && compRsn.isEmpty) return const SizedBox.shrink();
+            return Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.indigo.shade50,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.indigo.shade200),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.indigo.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.business_rounded, color: Colors.indigo.shade800, size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (compName.isNotEmpty)
+                          Text(
+                            compName,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.indigo.shade900,
+                            ),
+                          ),
+                        if (compRsn.isNotEmpty)
+                          Text(
+                            'Company RSN: $compRsn',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.indigo.shade700,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
           Expanded(
             child: SingleChildScrollView(
               child: Column(

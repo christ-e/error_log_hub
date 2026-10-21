@@ -7,11 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:vansales_firebase_erorrs/app/data/services/notification_service.dart';
 import 'package:vansales_firebase_erorrs/app/data/utils/error_utils.dart';
 import 'package:vansales_firebase_erorrs/app/data/utils/firebase_app_manager.dart';
 
 class EssErrorsController extends GetxController with GetSingleTickerProviderStateMixin {
   late TabController tabController;
+
+  void Function(Map<String, dynamic> doc, bool isException)? inspectDocCallback;
+  bool _isInitialExceptionsLoad = true;
+  bool _isInitialApiErrorsLoad = true;
 
   FirebaseFirestore get _firestore => FirebaseAppManager.getFirestore(FirebaseAppManager.appIdEss);
   String get _colExceptions => FirebaseAppManager.getExceptionCollection(FirebaseAppManager.appIdEss);
@@ -117,6 +122,9 @@ class EssErrorsController extends GetxController with GetSingleTickerProviderSta
     _excSubscription?.cancel();
     _apiErrSubscription?.cancel();
 
+    _isInitialExceptionsLoad = true;
+    _isInitialApiErrorsLoad = true;
+
     // 1. ESS Exceptions stream
     try {
       _excSubscription = _firestore
@@ -124,6 +132,25 @@ class EssErrorsController extends GetxController with GetSingleTickerProviderSta
           .limit(250)
           .snapshots()
           .listen((snap) {
+        if (_isInitialExceptionsLoad) {
+          _isInitialExceptionsLoad = false;
+        } else {
+          // Real-time newly added exception documents
+          for (final change in snap.docChanges) {
+            if (change.type == DocumentChangeType.added) {
+              final doc = {'id': change.doc.id, '_col': _colExceptions, ...change.doc.data() as Map<String, dynamic>};
+              if (Get.isRegistered<NotificationService>()) {
+                NotificationService.to.notifyError(
+                  appId: 'ess',
+                  doc: doc,
+                  isException: true,
+                  onInspect: () => inspectDocCallback?.call(doc, true),
+                );
+              }
+            }
+          }
+        }
+
         final docs = snap.docs.map((d) => {'id': d.id, '_col': _colExceptions, ...d.data()}).toList();
         _sortDocs(docs);
         rawExceptions.assignAll(docs);
@@ -147,6 +174,25 @@ class EssErrorsController extends GetxController with GetSingleTickerProviderSta
           .limit(250)
           .snapshots()
           .listen((snap) {
+        if (_isInitialApiErrorsLoad) {
+          _isInitialApiErrorsLoad = false;
+        } else {
+          // Real-time newly added API error documents
+          for (final change in snap.docChanges) {
+            if (change.type == DocumentChangeType.added) {
+              final doc = {'id': change.doc.id, '_col': _colApiErrors, ...change.doc.data() as Map<String, dynamic>};
+              if (Get.isRegistered<NotificationService>()) {
+                NotificationService.to.notifyError(
+                  appId: 'ess',
+                  doc: doc,
+                  isException: false,
+                  onInspect: () => inspectDocCallback?.call(doc, false),
+                );
+              }
+            }
+          }
+        }
+
         final docs = snap.docs.map((d) => {'id': d.id, '_col': _colApiErrors, ...d.data()}).toList();
         _sortDocs(docs);
         rawApiErrors.assignAll(docs);
